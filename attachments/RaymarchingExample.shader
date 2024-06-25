@@ -30,11 +30,17 @@ Shader "Pema99/Raymarching Example"
                 float4 vertex : SV_POSITION;
                 float3 camera_position : TEXCOORD0;  // Position of rendering camera in either world or object space.
                 float3 surface_position : TEXCOORD1; // Position of a given fragment in either world or object space.
+                UNITY_VERTEX_OUTPUT_STEREO // Required for instanced rendering.
             };
 
             v2f vert (appdata_base v)
             {
                 v2f o;
+                
+                UNITY_SETUP_INSTANCE_ID(v); // Setup the global unity_InstanceID.
+                UNITY_INITIALIZE_OUTPUT(v2f, o); // Initialize arbitrary structure with zero values.
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o); // Assign the stereo target eye.
+
                 o.vertex = UnityObjectToClipPos(v.vertex);
 
                 // Here was pass through the camera and fragment position, both in either world or object space, depending on
@@ -131,6 +137,7 @@ Shader "Pema99/Raymarching Example"
 
             float4 frag (v2f i, out float depth : SV_Depth) : SV_Target
             {
+                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i); // setup stereo eye index for fragment shader.
                 // Ray origin is just the current camera position.
                 float3 ray_origin = i.camera_position;
                 // The ray direction is the normalized vector going from camera position fragment position.
